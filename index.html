@@ -1,0 +1,867 @@
+Index · HTML
+Copy
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Name — Mycologist & Scientist</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0d110e;
+      --bg2: #111a12;
+      --cream: #e8e0cc;
+      --spore: #b8d4a8;
+      --mycelium: #7ab88a;
+      --cap: #c8a46e;
+      --glow: #4a9e5c;
+      --muted: #4a5e4d;
+      --accent: #d4826a;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'Lora', Georgia, serif;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      position: fixed;
+      width: 10px; height: 10px;
+      background: var(--mycelium);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.15s ease;
+      mix-blend-mode: screen;
+    }
+    .cursor-ring {
+      position: fixed;
+      width: 32px; height: 32px;
+      border: 1px solid var(--glow);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transition: all 0.3s ease;
+      opacity: 0.5;
+    }
+
+    /* Canvas backgrounds */
+    #bg-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      opacity: 0.35;
+    }
+
+    /* Nav */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 4rem;
+      background: linear-gradient(to bottom, rgba(13,17,14,0.9), transparent);
+      backdrop-filter: blur(2px);
+    }
+
+    .nav-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem;
+      color: var(--spore);
+      letter-spacing: 0.05em;
+    }
+
+    .nav-logo span { color: var(--cap); font-style: italic; }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 2.5rem;
+    }
+
+    nav ul li a {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    nav ul li a:hover { color: var(--mycelium); }
+
+    /* Sections */
+    section {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+    }
+
+    /* Hero */
+    #hero {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 0 4rem;
+      min-height: 100vh;
+    }
+
+    .hero-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--glow);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.3s forwards;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(3rem, 8vw, 7rem);
+      line-height: 1.05;
+      color: var(--cream);
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.5s forwards;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--cap);
+    }
+
+    .hero-sub {
+      max-width: 500px;
+      font-size: 1.05rem;
+      line-height: 1.75;
+      color: #8a9e8d;
+      margin-top: 1.8rem;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.7s forwards;
+    }
+
+    .hero-cta {
+      margin-top: 3rem;
+      display: flex;
+      gap: 1.2rem;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.9s forwards;
+    }
+
+    .btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.85rem 2rem;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background: var(--glow);
+      color: var(--bg);
+      border: 1px solid var(--glow);
+    }
+
+    .btn-primary:hover {
+      background: var(--mycelium);
+      box-shadow: 0 0 24px rgba(74,158,92,0.4);
+      transform: translateY(-2px);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--spore);
+      border: 1px solid var(--muted);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--spore);
+      transform: translateY(-2px);
+    }
+
+    /* Scrolling formula ticker */
+    .ticker {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 0; right: 0;
+      overflow: hidden;
+      opacity: 0.2;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      color: var(--mycelium);
+      white-space: nowrap;
+    }
+
+    .ticker-inner {
+      display: inline-block;
+      animation: ticker 30s linear infinite;
+    }
+
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* Section common */
+    .section-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 8rem 4rem;
+    }
+
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--glow);
+      margin-bottom: 1rem;
+    }
+
+    h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      color: var(--cream);
+      margin-bottom: 3rem;
+      line-height: 1.15;
+    }
+
+    h2 em { color: var(--cap); font-style: italic; }
+
+    /* Divider */
+    .mycelium-divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--muted), transparent);
+      margin: 0;
+      opacity: 0.4;
+    }
+
+    /* About */
+    #about { background: var(--bg2); }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+    }
+
+    .about-text p {
+      font-size: 1.05rem;
+      line-height: 1.85;
+      color: #8a9e8d;
+      margin-bottom: 1.5rem;
+    }
+
+    .about-text p strong { color: var(--spore); font-weight: 600; }
+
+    .about-visual {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Fibonacci spiral SVG */
+    .fib-spiral {
+      width: 320px; height: 320px;
+      opacity: 0.6;
+      animation: slowSpin 40s linear infinite;
+      filter: drop-shadow(0 0 20px rgba(74,158,92,0.3));
+    }
+
+    @keyframes slowSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .about-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 2.5rem;
+    }
+
+    .stat-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(122,184,138,0.15);
+      border-radius: 16px;
+      padding: 1.4rem;
+      transition: border-color 0.3s, background 0.3s;
+    }
+
+    .stat-card:hover {
+      border-color: rgba(122,184,138,0.4);
+      background: rgba(122,184,138,0.05);
+    }
+
+    .stat-number {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.2rem;
+      color: var(--mycelium);
+    }
+
+    .stat-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 0.3rem;
+    }
+
+    /* Projects */
+    #projects { background: var(--bg); }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .project-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(122,184,138,0.12);
+      border-radius: 20px;
+      padding: 2rem;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(to right, var(--glow), var(--cap));
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .project-card:hover::before { opacity: 1; }
+
+    .project-card:hover {
+      border-color: rgba(122,184,138,0.35);
+      background: rgba(74,158,92,0.05);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    .project-icon {
+      font-size: 2.2rem;
+      margin-bottom: 1.2rem;
+      display: block;
+    }
+
+    .project-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--glow);
+      margin-bottom: 0.7rem;
+    }
+
+    .project-card h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.3rem;
+      color: var(--cream);
+      margin-bottom: 0.8rem;
+    }
+
+    .project-card p {
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    .project-link {
+      display: inline-block;
+      margin-top: 1.4rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--mycelium);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .project-link:hover { color: var(--spore); }
+    .project-link::after { content: ' →'; }
+
+    /* Contact */
+    #contact { background: var(--bg2); }
+
+    .contact-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: start;
+    }
+
+    .contact-text p {
+      font-size: 1rem;
+      line-height: 1.85;
+      color: #8a9e8d;
+      margin-bottom: 2rem;
+    }
+
+    .links-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .links-list li a {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.4rem;
+      border: 1px solid rgba(122,184,138,0.12);
+      border-radius: 14px;
+      text-decoration: none;
+      color: var(--spore);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      transition: all 0.3s;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .links-list li a:hover {
+      border-color: var(--mycelium);
+      background: rgba(74,158,92,0.07);
+      transform: translateX(4px);
+    }
+
+    .link-icon { font-size: 1.1rem; }
+
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-group label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .form-group input,
+    .form-group textarea {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(122,184,138,0.15);
+      border-radius: 12px;
+      padding: 0.9rem 1.2rem;
+      color: var(--cream);
+      font-family: 'Lora', serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.3s;
+      resize: none;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: var(--glow);
+    }
+
+    .form-group textarea { min-height: 140px; }
+
+    /* Footer */
+    footer {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 3rem;
+      border-top: 1px solid rgba(122,184,138,0.1);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+
+    footer span { color: var(--glow); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      nav { padding: 1.2rem 1.5rem; }
+      nav ul { display: none; }
+      #hero { padding: 0 1.5rem; }
+      .section-inner { padding: 5rem 1.5rem; }
+      .about-grid, .contact-layout { grid-template-columns: 1fr; gap: 3rem; }
+      .projects-grid { grid-template-columns: 1fr; }
+      .about-visual { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Custom cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursor-ring"></div>
+
+  <!-- Animated canvas background -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- Nav -->
+  <nav>
+    <div class="nav-logo">Your<span>Name</span></div>
+    <ul>
+      <li><a href="#about">About</a></li>
+      <li><a href="#projects">Research</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <section id="hero">
+    <p class="hero-eyebrow">Mycologist · Researcher · Scientist</p>
+    <h1>Studying the <em>hidden</em><br/>networks of life</h1>
+    <p class="hero-sub">
+      Exploring mycology, mathematical biology, and the fractal geometries that underpin living systems. Passionate about fungi, spore ecology, and the science that connects us all.
+    </p>
+    <div class="hero-cta">
+      <a href="#projects" class="btn btn-primary">View Research</a>
+      <a href="#contact" class="btn btn-ghost">Get in Touch</a>
+    </div>
+
+    <div class="ticker">
+      <span class="ticker-inner">
+        Fibonacci sequence · φ = (1+√5)/2 ≈ 1.618 · Voronoi tessellation · Reaction-diffusion systems · Turing patterns · Mycelial networks · Spore dispersal dynamics · Fractal dimension · Lindenmayer systems · Golden angle = 137.5° · Fibonacci sequence · φ = (1+√5)/2 ≈ 1.618 · Voronoi tessellation · Reaction-diffusion systems · Turing patterns · Mycelial networks · Spore dispersal dynamics · Fractal dimension · Lindenmayer systems · Golden angle = 137.5° ·&nbsp;
+      </span>
+    </div>
+  </section>
+
+  <div class="mycelium-divider"></div>
+
+  <!-- About -->
+  <section id="about">
+    <div class="section-inner">
+      <div class="about-grid">
+        <div class="about-text">
+          <p class="section-label">About Me</p>
+          <h2>A scientist drawn to <em>strange</em> beauty</h2>
+          <p>
+            Hi, I'm <strong>Your Name</strong> — a biology student and researcher fascinated by fungi, mathematical patterns in nature, and the invisible systems that make life work.
+          </p>
+          <p>
+            My work sits at the intersection of <strong>mycology</strong>, mathematical modeling, and ecology. From the Fibonacci spirals of mushroom caps to the network topology of mycelial mats, I'm drawn to the patterns that repeat at every scale.
+          </p>
+          <div class="about-stats">
+            <div class="stat-card">
+              <div class="stat-number">12+</div>
+              <div class="stat-label">Species documented</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">3</div>
+              <div class="stat-label">Research projects</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">2</div>
+              <div class="stat-label">Publications</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">∞</div>
+              <div class="stat-label">Curiosity</div>
+            </div>
+          </div>
+        </div>
+        <div class="about-visual">
+          <!-- Fibonacci spiral SVG -->
+          <svg class="fib-spiral" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Fibonacci rectangles -->
+            <rect x="100" y="100" width="120" height="120" stroke="#4a9e5c" stroke-width="0.6" stroke-dasharray="2 4" opacity="0.5"/>
+            <rect x="160" y="100" width="60" height="60" stroke="#4a9e5c" stroke-width="0.6" stroke-dasharray="2 4" opacity="0.4"/>
+            <rect x="160" y="160" width="60" height="60" stroke="#7ab88a" stroke-width="0.6" stroke-dasharray="2 4" opacity="0.4"/>
+            <rect x="100" y="160" width="60" height="60" stroke="#7ab88a" stroke-width="0.6" stroke-dasharray="2 4" opacity="0.3"/>
+            <!-- Fibonacci spiral arcs -->
+            <path d="M 220 100 A 120 120 0 0 1 100 220" stroke="#4a9e5c" stroke-width="1.5" fill="none" opacity="0.7"/>
+            <path d="M 220 100 A 60 60 0 0 0 160 160" stroke="#7ab88a" stroke-width="1.2" fill="none" opacity="0.6"/>
+            <path d="M 160 160 A 60 60 0 0 1 220 220" stroke="#7ab88a" stroke-width="1.2" fill="none" opacity="0.5"/>
+            <path d="M 160 160 A 40 40 0 0 0 160 200" stroke="#b8d4a8" stroke-width="1" fill="none" opacity="0.4"/>
+            <!-- Dots at Fibonacci points -->
+            <circle cx="160" cy="160" r="2.5" fill="#4a9e5c" opacity="0.8"/>
+            <circle cx="220" cy="100" r="2" fill="#7ab88a" opacity="0.6"/>
+            <circle cx="100" cy="220" r="2" fill="#7ab88a" opacity="0.6"/>
+            <circle cx="220" cy="220" r="2" fill="#b8d4a8" opacity="0.5"/>
+            <!-- Radial lines like spore burst -->
+            <line x1="160" y1="160" x2="160" y2="60" stroke="#4a9e5c" stroke-width="0.4" opacity="0.2"/>
+            <line x1="160" y1="160" x2="245" y2="107" stroke="#4a9e5c" stroke-width="0.4" opacity="0.2"/>
+            <line x1="160" y1="160" x2="245" y2="213" stroke="#4a9e5c" stroke-width="0.4" opacity="0.2"/>
+            <line x1="160" y1="160" x2="160" y2="260" stroke="#4a9e5c" stroke-width="0.4" opacity="0.2"/>
+            <line x1="160" y1="160" x2="75" y2="213" stroke="#4a9e5c" stroke-width="0.4" opacity="0.2"/>
+            <line x1="160" y1="160" x2="75" y2="107" stroke="#4a9e5c" stroke-width="0.4" opacity="0.2"/>
+            <!-- Outer circle -->
+            <circle cx="160" cy="160" r="130" stroke="#4a9e5c" stroke-width="0.4" stroke-dasharray="3 6" opacity="0.25" fill="none"/>
+            <circle cx="160" cy="160" r="85" stroke="#4a9e5c" stroke-width="0.4" stroke-dasharray="3 6" opacity="0.2" fill="none"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="mycelium-divider"></div>
+
+  <!-- Projects -->
+  <section id="projects">
+    <div class="section-inner">
+      <p class="section-label">Research & Projects</p>
+      <h2>What I'm working <em>on</em></h2>
+      <div class="projects-grid">
+        <div class="project-card">
+          <span class="project-icon">🍄</span>
+          <div class="project-tag">Mycology</div>
+          <h3>Mycelial Network Topology</h3>
+          <p>Mapping the graph-theoretic properties of Armillaria mycelial mats and comparing their resilience to man-made internet infrastructure.</p>
+          <a href="#" class="project-link">View project</a>
+        </div>
+        <div class="project-card">
+          <span class="project-icon">🔬</span>
+          <div class="project-tag">Mathematical Biology</div>
+          <h3>Turing Patterns in Fungi</h3>
+          <p>Applying reaction-diffusion equations to model the spotted and striped pigmentation patterns observed in polypore fungi.</p>
+          <a href="#" class="project-link">View project</a>
+        </div>
+        <div class="project-card">
+          <span class="project-icon">🌿</span>
+          <div class="project-tag">Ecology</div>
+          <h3>Spore Dispersal Dynamics</h3>
+          <p>Probabilistic modeling of Basidiospore dispersal using fluid dynamics and atmospheric turbulence models calibrated to field data.</p>
+          <a href="#" class="project-link">View project</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="mycelium-divider"></div>
+
+  <!-- Contact -->
+  <section id="contact">
+    <div class="section-inner">
+      <div class="contact-layout">
+        <div class="contact-text">
+          <p class="section-label">Get In Touch</p>
+          <h2>Let's talk <em>science</em></h2>
+          <p>Whether you're working on a collaboration, want to chat about mycology, or just found an interesting mushroom — I'd love to hear from you.</p>
+          <ul class="links-list">
+            <li>
+              <a href="https://github.com/yourusername" target="_blank">
+                <span class="link-icon">🔗</span> github.com/yourusername
+              </a>
+            </li>
+            <li>
+              <a href="mailto:your@email.com">
+                <span class="link-icon">✉️</span> your@email.com
+              </a>
+            </li>
+            <li>
+              <a href="https://linkedin.com/in/yourprofile" target="_blank">
+                <span class="link-icon">🧪</span> linkedin.com/in/yourprofile
+              </a>
+            </li>
+            <li>
+              <a href="#" target="_blank">
+                <span class="link-icon">📄</span> Download CV / Resume
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="contact-form">
+          <div class="form-group">
+            <label>Your name</label>
+            <input type="text" placeholder="Ada Lovelace" />
+          </div>
+          <div class="form-group">
+            <label>Email address</label>
+            <input type="email" placeholder="ada@science.org" />
+          </div>
+          <div class="form-group">
+            <label>Message</label>
+            <textarea placeholder="Tell me what you're exploring..."></textarea>
+          </div>
+          <a href="#" class="btn btn-primary" style="text-align:center;">Send Message</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Made with spores & equations by <span>Your Name</span> · 2025</p>
+  </footer>
+
+  <script>
+    // Custom cursor
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursor-ring');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX - 5 + 'px';
+      cursor.style.top = e.clientY - 5 + 'px';
+      ring.style.left = e.clientX - 16 + 'px';
+      ring.style.top = e.clientY - 16 + 'px';
+    });
+    document.querySelectorAll('a, button, .project-card, .stat-card').forEach(el => {
+      el.addEventListener('mouseenter', () => { ring.style.transform = 'scale(1.6)'; ring.style.opacity = '0.9'; });
+      el.addEventListener('mouseleave', () => { ring.style.transform = 'scale(1)'; ring.style.opacity = '0.5'; });
+    });
+
+    // Canvas: mycelial spore particles + Voronoi-inspired lines
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H, particles;
+
+    function resize() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+
+    class Particle {
+      constructor() { this.reset(true); }
+      reset(init = false) {
+        this.x = Math.random() * W;
+        this.y = init ? Math.random() * H : H + 10;
+        this.r = Math.random() * 2.5 + 0.5;
+        this.speed = Math.random() * 0.4 + 0.1;
+        this.drift = (Math.random() - 0.5) * 0.3;
+        this.opacity = Math.random() * 0.6 + 0.1;
+        this.pulse = Math.random() * Math.PI * 2;
+        this.pulseSpeed = Math.random() * 0.02 + 0.005;
+        // spore type: circle or small cross
+        this.type = Math.random() < 0.7 ? 'circle' : 'cross';
+      }
+      update() {
+        this.y -= this.speed;
+        this.x += this.drift;
+        this.pulse += this.pulseSpeed;
+        if (this.y < -10) this.reset();
+      }
+      draw() {
+        const a = this.opacity * (0.7 + 0.3 * Math.sin(this.pulse));
+        ctx.globalAlpha = a;
+        ctx.fillStyle = '#7ab88a';
+        ctx.strokeStyle = '#4a9e5c';
+        if (this.type === 'circle') {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          ctx.moveTo(this.x - this.r * 1.5, this.y);
+          ctx.lineTo(this.x + this.r * 1.5, this.y);
+          ctx.moveTo(this.x, this.y - this.r * 1.5);
+          ctx.lineTo(this.x, this.y + this.r * 1.5);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Mycelium branching lines (static fractal-like structure per frame)
+    function drawMyceliumLines(pts) {
+      // Draw faint connecting lines between nearby particles — like hyphae
+      ctx.lineWidth = 0.4;
+      for (let i = 0; i < pts.length; i++) {
+        for (let j = i + 1; j < pts.length; j++) {
+          const dx = pts[i].x - pts[j].x;
+          const dy = pts[i].y - pts[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 120) {
+            const a = (1 - dist / 120) * 0.12;
+            ctx.globalAlpha = a;
+            ctx.strokeStyle = '#4a9e5c';
+            ctx.beginPath();
+            ctx.moveTo(pts[i].x, pts[i].y);
+            ctx.lineTo(pts[j].x, pts[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    // Reaction-diffusion inspired subtle hexagonal background pattern
+    function drawHexPattern() {
+      const size = 60;
+      const h = size * Math.sqrt(3);
+      ctx.globalAlpha = 0.03;
+      ctx.strokeStyle = '#7ab88a';
+      ctx.lineWidth = 0.5;
+      for (let row = -1; row < H / h + 1; row++) {
+        for (let col = -1; col < W / size / 1.5 + 1; col++) {
+          const x = col * size * 1.5;
+          const y = row * h + (col % 2 === 0 ? 0 : h / 2);
+          hexPath(x, y, size * 0.48);
+          ctx.stroke();
+        }
+      }
+    }
+
+    function hexPath(cx, cy, r) {
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI / 3) * i - Math.PI / 6;
+        const px = cx + r * Math.cos(angle);
+        const py = cy + r * Math.sin(angle);
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+    }
+
+    function init() {
+      resize();
+      particles = Array.from({ length: 120 }, () => new Particle());
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, W, H);
+      drawHexPattern();
+      drawMyceliumLines(particles);
+      particles.forEach(p => { p.update(); p.draw(); });
+      ctx.globalAlpha = 1;
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', () => { resize(); });
+    init();
+    animate();
+  </script>
+</body>
+</html>
